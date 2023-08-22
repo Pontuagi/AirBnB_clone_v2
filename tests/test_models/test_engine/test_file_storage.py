@@ -2,7 +2,13 @@
 """ Module for testing file storage"""
 import unittest
 from models.base_model import BaseModel
+from models.user import User
 from models import storage
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
 import os
 
 
@@ -40,6 +46,23 @@ class test_fileStorage(unittest.TestCase):
         new = BaseModel()
         temp = storage.all()
         self.assertIsInstance(temp, dict)
+
+        obj1 = BaseModel()
+        obj2 = User()
+        storage.new(obj1)
+        storage.new(obj2)
+
+        # Test all() without class filter
+        all_objects = storage.all()
+        self.assertIn(f"BaseModel.{obj1.id}", all_objects)
+        self.assertIn(f"User.{obj2.id}", all_objects)
+
+        # Test all() with class filter
+        obj3 = State()
+        storage.new(obj3)
+        cls_objects = storage.all(State)
+        self.assertNotIn(f"BaseModel.{obj3.id}", cls_objects)
+        self.assertIn(f"State.{obj3.id}", cls_objects)
 
     def test_base_model_instantiation(self):
         """ File is not created on BaseModel save """
@@ -107,3 +130,21 @@ class test_fileStorage(unittest.TestCase):
         from models.engine.file_storage import FileStorage
         print(type(storage))
         self.assertEqual(type(storage), FileStorage)
+
+    def test_delete(self):
+        """ Object is deleted successfully from __objects """
+        obj = BaseModel()
+        storage.new(obj)
+        storage.save()
+        storage.delete(obj)
+        storage.save()
+        self.assertNotIn(f"BaseModel.{obj.id}", storage.all())
+
+    def test_delete_none(self):
+        """ None object passed is handled correctly """
+        obj = BaseModel()
+        storage.new(obj)
+        storage.save()
+        storage.delete(None)
+        storage.save()
+        self.assertIn(f"BaseModel.{obj.id}", storage.all())
