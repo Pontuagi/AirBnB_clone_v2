@@ -2,10 +2,16 @@
 
 """Defines the DBStorage engine."""
 
+from models.base_model import BaseModel, Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from models.base_model import Base
 import os
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
 
 
 class DBStorage:
@@ -29,20 +35,8 @@ class DBStorage:
         if env == 'test':
             Base.metadata.drop_all(self.__engine)
 
-        Base.metadata.create_all(self.__engine)
-
-        self.__session = scoped_session(
-            sessionmaker(bind=self.__engine, expire_on_commit=False)
-        )
-
     def all(self, cls=None):
         """ """
-        from models.city import City
-        from models.amenity import Amenity
-        from models.place import Place
-        from models.review import Review
-        from models.state import State
-        from models.user import User
         if cls is None:
             cls_list = [User, State, City, Amenity, Place, Review]
             result = {}
@@ -73,7 +67,6 @@ class DBStorage:
 
     def reload(self):
         Base.metadata.create_all(self.__engine)
-        self.__session.close_all()
         self.__session = scoped_session(
             sessionmaker(bind=self.__engine, expire_on_commit=False)
         )

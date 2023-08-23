@@ -7,6 +7,7 @@ from sqlalchemy import Column, String, Integer, Float, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from os import getenv
 import models
+from sqlalchemy import Table
 
 
 """ Many-to-Many relationship table """
