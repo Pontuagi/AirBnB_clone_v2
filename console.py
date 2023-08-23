@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 """ Console Module """
 import cmd
 import sys
@@ -113,7 +114,7 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def process_value(value):
+    def process_value(self, value):
         """ Checks the value syntax of Object parameters """
         if value.startswith('"') and value.endswith('"'):
             value = value[1:-1].replace('"', '\"').replace('_', ' ')
@@ -135,18 +136,18 @@ class HBNBCommand(cmd.Cmd):
         elif c_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        args = new_list[1:]
+        new_args = new_list[1:]
 
-        for arg in args:
+        for arg in new_args:
             key_value = arg.split('=')
             if len(key_value) != 2:
-                continue
+               continue
             key, value = key_value
             value = process_value(value)
             if value is not None:
-                args[key] = value
+                new_args[key] = value
 
-        new_instance = HBNBCommand.classes[args]()
+        new_instance = HBNBCommand.classes[c_name](**args)
         storage.save()
         print(new_instance.id)
         storage.save()
