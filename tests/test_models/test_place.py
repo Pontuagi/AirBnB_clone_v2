@@ -2,6 +2,8 @@
 """ """
 from tests.test_models.test_base_model import test_basemodel
 from models.place import Place
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 
 
 class test_Place(test_basemodel):
@@ -12,6 +14,18 @@ class test_Place(test_basemodel):
         super().__init__(*args, **kwargs)
         self.name = "Place"
         self.value = Place
+
+    def setUp(self):
+        """Set up the test environment"""
+        self.engine = create_engine('sqlite:///:memory:')
+        Base.metadata.create_all(self.engine)
+        Session = sessionmaker(bind=self.engine)
+        self.session = Session()
+
+    def tearDown(self):
+        """Tear down the test environment"""
+        self.session.close()
+        Base.metadata.drop_all(self.engine)
 
     def test_city_id(self):
         """ """
@@ -61,9 +75,26 @@ class test_Place(test_basemodel):
     def test_longitude(self):
         """ """
         new = self.value()
-        self.assertEqual(type(new.latitude), float)
+        self.assertEqual(type(new.longitude), float)
 
     def test_amenity_ids(self):
         """ """
         new = self.value()
         self.assertEqual(type(new.amenity_ids), list)
+
+    def test_amenities_property(self):
+        """Test the amenities property getter"""
+        place = Place()
+        self.assertIsInstance(place.amenities, list)
+
+    def test_amenities_property_setter(self):
+        """Test the amenities property setter"""
+        place = Place()
+        amenity_ids = ["amenity-1", "amenity-2"]
+        place.amenities = amenity_ids
+        self.assertEqual(place.amenity_ids, amenity_ids)
+
+    def test_reviews_property(self):
+        """Test the reviews property getter"""
+        place = Place()
+        self.assertIsInstance(place.reviews, list)
