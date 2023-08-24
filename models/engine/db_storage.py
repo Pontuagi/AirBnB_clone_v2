@@ -23,7 +23,7 @@ class DBStorage:
         """ """
         user = os.getenv('HBNB_MYSQL_USER')
         password = os.getenv('HBNB_MYSQL_PWD')
-        host = os.getenv('HBNB_MYSQL_HOST', 'localhost')
+        host = os.getenv('HBNB_MYSQL_HOST')
         database = os.getenv('HBNB_MYSQL_DB')
         env = os.getenv('HBNB_ENV')
 
