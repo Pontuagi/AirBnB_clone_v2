@@ -85,6 +85,11 @@ alias_config="location /hbnb_static/ {
 	alias /data/web_static/current/;
 	index index.html;
 	}"
-sudo sed -i "s|location / {|location / { $alias_config" "$nginx_config"
+sudo sed -i "s|location / {|location / { $alias_config|g" "$nginx_config"
 sudo nginx -t
-sudo systemctl restart nginx
+if [ $? -eq 0 ]; then
+    sudo systemctl restart nginx
+    echo "Nginx configuration updated and Nginx restarted."
+else
+    echo "Nginx configuration test failed. Please check your configuration."
+fi
