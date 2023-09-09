@@ -50,11 +50,11 @@ sudo mkdir -p '$(dirname "$html_file")'
 echo "<html>
         <head>
                 <title> **Test Page** </title>
-        </head>
+	</head>
         <body>
                 <h1> Hello, It mr Pontuagi!</h1>
         </body>
-     </html>" | sudo tee "$html_file" > /dev/null
+      </html>" | sudo tee "$html_file" > /dev/null
 
 echo "test HTML file created"
 
