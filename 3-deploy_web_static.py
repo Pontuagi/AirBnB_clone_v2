@@ -11,7 +11,7 @@ import re
 from datetime import datetime
 
 env.user = 'ubuntu'
-env.hosts = ["100.26.210.32", "100.26.157.149"]
+env.hosts = ["100.26.136.11", "54.236.190.242"]
 env.key_filename = "~/id_rsa"
 
 def do_pack():
