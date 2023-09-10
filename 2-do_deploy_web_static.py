@@ -1,50 +1,62 @@
 #!/usr/bin/python3
 """
-Fabric script (based on the file 1-pack_web_static.py) that distributes
-an archive to your web servers, using the function do_deploy
+A Fabric script (based on the file 1-pack_web_static.py)
+that distributes an archive to your web servers, using the function do_deploy:
 """
 
-from datetime import datetime
-from fabric.api import *
+from fabric import Connection
 import os
 
-env.hosts = ["100.26.210.32", "100.26.157.149"]
-env.user = "ubuntu"
+env.hosts = ["100.26.136.11", "54.236.190.242"]
 
-def do_pack():
-    """
-    Return the archive path if archive has generated correctly.
-    """
-    local("mkdir -p versions")
-    date = datetime.now().strftime("%Y%m%d%H%M%S")
-    archived_f_path = "versions/web_static_{}.tgz".format(date)
-    t_gzip_archive = local("tar -cvzf {} web_static".format(archived_f_path))
-
-    if t_gzip_archive.succeeded:
-        return archived_f_path
-    else:
-        return None
 
 def do_deploy(archive_path):
     """
-    Archieve distribution
+    A function to distribute an archive to web servers
     """
-    if os.path.exists(archive_path):
-        archived_file = archive_path[9:]
-        newest_version = "/data/web_static/releases/" + archived_file[:-4]
-        archived_file = "/tmp" + archived_file
-        put(archive_path, "/tmp/")
-        run("sudo mkdir -p {}".format(newest_version))
-        run("sudo tar -xzf {} -C {}/".format(archived_file,
-                                             newest_version))
-        run("sudo rm {}".format(archived_file))
-        run("sudo mv {}/web_static/* {}".format(newest_version,
-                                                newest_version))
-        run("sudo rm -rf {}/web_static".format(newest_version))
-        run("sudo rm -rf /data/web_static/current")
-        run("sudo ln -s {} /data/web_static/current".format(newest_version))
+    username = "ubuntu"
+    remote_dir = "/tmp/"
 
-        print("New version deployed!")
-        return True
+    if not os.path.exists(archive_path):
+        return False
 
-return False
+    try:
+        with Connection(env.hosts[0], user=username) as c:
+            # Upload the archive to the /tmp/ directory on the web server.
+            c.put(archive_path, remote=remote_dir)
+            # Extract the filename without extension from the archive_path.
+            archive_filename = os.path.basename(archive_path)
+            directory_name = os.path.splitext(archive_filename)[0]
+            # Define the target directory where the archive will be extracted.
+            target_directory = f'/data/web_static/releases/{directory_name}'
+
+            # Create the target directory if it doesn't exist.
+            c.run(f'mkdir -p {target_directory}')
+
+            # Uncompress the archive to the target directory.
+            c.run(f'tar - xzvf {os.path.join(remote_dir, archive_filename)} /
+                  -C {target_directory}')
+
+            # Delete the archive file on the remote server.
+            c.run(f'rm {os.path.join(remote_dir, archive_filename)}')
+
+            # Delete the symbolic link /data/web_static/current if it exists.
+            c.run(f'rm -f /data/web_static/current')
+
+            # Create a new symbolic link linked to the new version of the code.
+            c.run(f'ln -s {target_directory} /data/web_static/current')
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+
+    return True
+
+
+if __name__ == "__main__":
+    archive_path = do_pack()
+    if archive_path:
+        result = do_deploy(archive_path)
+        if result:
+            print("Deployment successful.")
+        else:
+            print("Deployment failed.")
