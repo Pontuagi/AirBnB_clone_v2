@@ -46,8 +46,7 @@ def do_deploy(archive_path):
                 # Extract the filename without extension from the archive_path.
                 directory_name = archive_path[9:]
                 # Define the target directory where archive will be extracted.
-                target_directory =
-                f'/data/web_static/releases/{directory_name[:-4]}'
+                target_directory = '/data/web_static/releases/{}'.format(directory_name[:-4])
 
                 # Create the target directory if it doesn't exist.
                 c.run(f'sudo mkdir -p {target_directory}')
