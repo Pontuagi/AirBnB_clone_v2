@@ -9,10 +9,11 @@ import os
 from datetime import datetime
 
 env.hosts = ["100.26.136.11", "54.236.190.242"]
+env.user = "ubuntu"
 
 
 def do_pack():
-    """ 
+    """
     Generates a .tgz archive from the contents of the web_static folder
     """
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -38,30 +39,37 @@ def do_deploy(archive_path):
         return False
 
     try:
-        with Connection(env.hosts[0], user=username) as c:
-            # Upload the archive to the /tmp/ directory on the web server.
-            c.put(archive_path, remote=remote_dir)
-            # Extract the filename without extension from the archive_path.
-            archive_filename = os.path.basename(archive_path)
-            directory_name = os.path.splitext(archive_filename)[0]
-            # Define the target directory where the archive will be extracted.
-            target_directory = f'/data/web_static/releases/{directory_name}'
+        for host in env.hosts:
+            with Connection(host, user=username) as c:
+                # Upload the archive to the /tmp/ directory on the web server.
+                c.put(archive_path, remote=remote_dir)
+                # Extract the filename without extension from the archive_path.
+                directory_name = archive_path[9:]
+                # Define the target directory where archive will be extracted.
+                target_directory =
+                f'/data/web_static/releases/{directory_name[:-4]}'
 
-            # Create the target directory if it doesn't exist.
-            c.run(f'mkdir -p {target_directory}')
+                # Create the target directory if it doesn't exist.
+                c.run(f'sudo mkdir -p {target_directory}')
 
-            # Uncompress the archive to the target directory.
-            c.run(f'tar - xzvf {os.path.join(remote_dir, archive_filename)} \
-                  -C {target_directory}')
+                # Uncompress the archive to the target directory.
+                c.run(f'sudo tar -xzf {directory_name} -C {target_directory}')
 
-            # Delete the archive file on the remote server.
-            c.run(f'rm {os.path.join(remote_dir, archive_filename)}')
+                # Delete the archive file on the remote server.
+                c.run(f'sudo rm {os.path.join(remote_dir, archive_filename)}')
 
-            # Delete the symbolic link /data/web_static/current if it exists.
-            c.run(f'rm -f /data/web_static/current')
+                symbolic_link_path = "/data/web_static/current"
 
-            # Create a new symbolic link linked to the new version of the code.
-            c.sudo(f'ln -s {target_directory} /data/web_static/current')
+                # Delete the symbolic link if it exists.
+                if c.run(
+                    f'sudo test -L {symbolic_link_path}',
+                    warn=True,
+                    hide=True
+                ).ok:
+                    c.run(f'sudo rm {symbolic_link_path}')
+
+                # Create a new symbolic link linked to new version of the code.
+                c.run(f'sudo ln -s {target_directory} {symbolic_link_path}')
     except Exception as e:
         print(f"Error: {e}")
         return False
