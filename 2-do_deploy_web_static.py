@@ -5,6 +5,7 @@ that distributes an archive to your web servers, using the function do_deploy:
 """
 
 from fabric import Connection
+from "1-pack_web_static" import do_pack
 import os
 
 env.hosts = ["100.26.136.11", "54.236.190.242"]
@@ -34,7 +35,7 @@ def do_deploy(archive_path):
             c.run(f'mkdir -p {target_directory}')
 
             # Uncompress the archive to the target directory.
-            c.run(f'tar - xzvf {os.path.join(remote_dir, archive_filename)} /
+            c.run(f'tar - xzvf {os.path.join(remote_dir, archive_filename)} \
                   -C {target_directory}')
 
             # Delete the archive file on the remote server.
