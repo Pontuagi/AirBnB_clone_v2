@@ -5,10 +5,26 @@ that distributes an archive to your web servers, using the function do_deploy:
 """
 
 from fabric import Connection
-from "1-pack_web_static" import do_pack
 import os
+from datetime import datetime
 
 env.hosts = ["100.26.136.11", "54.236.190.242"]
+
+
+def do_pack():
+    """ 
+    Generates a .tgz archive from the contents of the web_static folder
+    """
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    archive_name = "web_static_" + timestamp + ".tgz"
+    archive_path = "versions/" + archive_name
+
+    try:
+        local("mkdir -p versions")
+        local("tar -cvzf {} web_static".format(archive_path))
+        return archive_path
+    except Exception:
+        return None
 
 
 def do_deploy(archive_path):
@@ -45,7 +61,7 @@ def do_deploy(archive_path):
             c.run(f'rm -f /data/web_static/current')
 
             # Create a new symbolic link linked to the new version of the code.
-            c.run(f'ln -s {target_directory} /data/web_static/current')
+            c.sudo(f'ln -s {target_directory} /data/web_static/current')
     except Exception as e:
         print(f"Error: {e}")
         return False
