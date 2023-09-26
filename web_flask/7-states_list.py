@@ -5,7 +5,8 @@ The application is listening on 0.0.0.0, port 5000
 """
 
 from flask import Flask, render_template
-from models import storage, State
+from models.state import State
+from models import storage
 
 app = Flask(__name__)
 

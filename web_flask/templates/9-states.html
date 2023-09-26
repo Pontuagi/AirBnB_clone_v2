@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HBNB</title>
+</head>
+<body>
+    <h1>{% if state %}State: {{ state.name }}{% else %}States{% endif %}</h1>
+    {% if state %}
+    <h3>Cities:</h3>
+    <ul>
+        {% for city in state.cities %}
+            <li><b>{{ city.id }}</b>: <b>{{ city.name }}</b></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <ul>
+        {% for state in states %}
+            <li><b>{{ state.id }}</b>: <a href="/states/{{ state.id }}"><b>{{ state.name }}</b></a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>
+
