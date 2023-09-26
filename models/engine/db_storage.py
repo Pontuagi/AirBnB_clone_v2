@@ -17,7 +17,7 @@ if getenv('HBNB_TYPE_STORAGE') == 'db':
     from models.place import place_amenity
 
 classes = {"User": User, "State": State, "City": City,
-           "Amenity": Amenity, "Place": Place, "Review": Review)
+           "Amenity": Amenity, "Place": Place, "Review": Review}
 
 
 class DBStorage:
@@ -26,21 +26,12 @@ class DBStorage:
     __session = None
 
     def __init__(self):
-        """ """
-<<<<<<< HEAD
+        """ Create engine """
         HBNB_MYSQL_USER = getenv('HBNB_MYSQL_USER')
         HBNB_MYSQL_PWD = getenv('HBNB_MYSQL_PWD')
         HBNB_MYSQL_HOST = getenv('HBNB_MYSQL_HOST')
         HBNB_MYSQL_DB = getenv('HBNB_MYSQL_DB')
-        HBNB_ENV = getenv('HBNB_ENV')
-=======
-        user = os.getenv('HBNB_MYSQL_USER')
-        password = os.getenv('HBNB_MYSQL_PWD')
-        host = os.getenv('HBNB_MYSQL_HOST')
-        database = os.getenv('HBNB_MYSQL_DB')
-        env = os.getenv('HBNB_ENV')
 
->>>>>>> e75962b342c2ed88ed3fbe9f575e87fa98cb4538
         self.__engine = create_engine(
             'mysql+mysqldb://{}:{}@{}/{}'.format(
                                            HBNB_MYSQL_USER,
@@ -48,7 +39,6 @@ class DBStorage:
                                            HBNB_MYSQL_HOST,
                                            HBNB_MYSQL_DB
                                       ), pool_pre_ping=True)
-
 
         if env == 'test':
             Base.metadata.drop_all(self.__engine)
@@ -97,7 +87,7 @@ class DBStorage:
         self.__session = scoped_session(
             sessionmaker(bind=self.__engine, expire_on_commit=False)
         )
-        
+
     def close(self):
         """Closes the SQLAlchemy session"""
         self.__session.close()
